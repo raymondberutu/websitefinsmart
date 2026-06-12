@@ -7,6 +7,9 @@ import { UserLayout } from './layouts/UserLayout';
 import { AdminLayout } from './layouts/AdminLayout';
 import { AuthProvider } from './contexts/AuthContext';
 
+// Admin Auth
+import AdminLogin from './pages/admin/Login';
+
 // User Pages
 import UserDashboard from './pages/user/Dashboard';
 import SimulasiKredit from './pages/user/SimulasiKredit';
@@ -36,6 +39,7 @@ function App() {
       <BrowserRouter>
         <Routes>
         <Route path="/login" element={<Login />} />
+        <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/register" element={<Register />} />
         <Route path="/google-mock-login" element={<GoogleMockLogin />} />
         
