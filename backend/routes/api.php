@@ -56,4 +56,6 @@ Route::post('/login/google-mock', [AuthController::class, 'mockGoogleLogin']);
     Route::get('/admin/artikels', [\App\Http\Controllers\AdminController::class, 'indexArtikels']);
     Route::post('/admin/artikels', [\App\Http\Controllers\AdminController::class, 'storeArtikel']);
     Route::delete('/admin/artikels/{id}', [\App\Http\Controllers\AdminController::class, 'destroyArtikel']);
+
+    Route::get('/admin/credit-simulations', [\App\Http\Controllers\CreditScoringController::class, 'indexAll']);
 });

@@ -36,6 +36,7 @@ import AdminDashboard from './pages/admin/Dashboard';
 import AdminUsers from './pages/admin/Users';
 import AdminUmkm from './pages/admin/Umkm';
 import AdminTransaksi from './pages/admin/Transaksi';
+import AdminSkorKredit from './pages/admin/SkorKredit';
 import AdminEdukasi from './pages/admin/Edukasi';
 import AdminLaporan from './pages/admin/Laporan';
 import AdminPengaturan from './pages/admin/Pengaturan';
@@ -95,6 +96,7 @@ function App() {
           <Route path="users" element={<AdminUsers />} />
           <Route path="umkm" element={<AdminUmkm />} />
           <Route path="transaksi" element={<AdminTransaksi />} />
+          <Route path="skor-kredit" element={<AdminSkorKredit />} />
           <Route path="edukasi" element={<AdminEdukasi />} />
           <Route path="laporan" element={<AdminLaporan />} />
           <Route path="pengaturan" element={<AdminPengaturan />} />

@@ -15,6 +15,7 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
     { name: 'Data Pengguna', path: '/admin/users', icon: <Users size={20} /> },
     { name: 'Data UMKM', path: '/admin/umkm', icon: <Store size={20} /> },
     { name: 'Seluruh Transaksi', path: '/admin/transaksi', icon: <CreditCard size={20} /> },
+    { name: 'Riwayat Skor Kredit', path: '/admin/skor-kredit', icon: <FileText size={20} /> },
     { name: 'Manajemen Edukasi', path: '/admin/edukasi', icon: <FileText size={20} /> },
     { name: 'Laporan & Export', path: '/admin/laporan', icon: <Download size={20} /> },
     { name: 'Pengaturan Sistem', path: '/admin/pengaturan', icon: <Settings size={20} /> },

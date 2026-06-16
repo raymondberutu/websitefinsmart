@@ -179,4 +179,10 @@ class CreditScoringController extends Controller
 
         return response()->json($recommendations);
     }
+
+    public function indexAll(Request $request)
+    {
+        $history = CreditSimulation::with('user')->orderBy('created_at', 'desc')->get();
+        return response()->json($history);
+    }
 }

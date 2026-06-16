@@ -1,15 +1,15 @@
 import { useState, useEffect } from 'react';
-import { Calendar, FileBarChart, Download, Loader } from 'lucide-react';
+import { Calendar, FileBarChart, Download, Loader, User } from 'lucide-react';
 import api from '../../lib/axios';
 
-const Riwayat = () => {
+const SkorKredit = () => {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchHistory = async () => {
       try {
-        const { data } = await api.get('/credit/history');
+        const { data } = await api.get('/admin/credit-simulations');
         setHistory(data);
       } catch (err) {
         console.error('Failed to fetch history', err);
@@ -49,6 +49,7 @@ INFORMASI ANALISIS
 ------------------
 ID Analisis    : ${item.id}
 Tanggal        : ${formatDate(item.created_at)}
+Pemilik UMKM   : ${item.user?.name || 'Unknown User'}
 
 HASIL PENILAIAN
 ---------------
@@ -60,7 +61,7 @@ REKOMENDASI SISTEM
 ${item.rekomendasi || 'Sistem telah mencatat analisis ini. Terus tingkatkan transaksi QRIS Anda.'}
 ${details}
 ====================================================
-Dicetak pada: ${new Date().toLocaleString('id-ID')}
+Dicetak oleh: Admin FinSmart pada ${new Date().toLocaleString('id-ID')}
 ====================================================
 `;
 
@@ -68,7 +69,7 @@ Dicetak pada: ${new Date().toLocaleString('id-ID')}
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.setAttribute('href', url);
-      link.setAttribute('download', `Laporan_Analisis_${item.id}.txt`);
+      link.setAttribute('download', `Laporan_Analisis_${item.id}_${item.user?.name || 'UMKM'}.txt`);
       link.style.visibility = 'hidden';
       document.body.appendChild(link);
       link.click();
@@ -91,8 +92,8 @@ Dicetak pada: ${new Date().toLocaleString('id-ID')}
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Riwayat Analisis</h1>
-        <p className="text-gray-500 text-sm mt-1">Rekam jejak simulasi kelayakan kredit Anda dari waktu ke waktu.</p>
+        <h1 className="text-2xl font-bold text-gray-900">Riwayat Skor Kredit UMKM</h1>
+        <p className="text-gray-500 text-sm mt-1">Pantau seluruh riwayat analisis kelayakan kredit dari berbagai UMKM.</p>
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
@@ -104,8 +105,9 @@ Dicetak pada: ${new Date().toLocaleString('id-ID')}
                   <div className="p-3 bg-blue-50 text-blue-600 rounded-lg hidden sm:block"><FileBarChart size={24} /></div>
                   <div>
                     <h3 className="font-bold text-gray-900">{item.id}</h3>
-                    <div className="flex items-center text-sm text-gray-500 mt-1 gap-1">
-                      <Calendar size={14} /> {formatDate(item.created_at)}
+                    <div className="flex items-center text-sm text-gray-500 mt-1 gap-4">
+                      <span className="flex items-center gap-1"><User size={14} /> {item.user?.name || 'Unknown User'}</span>
+                      <span className="flex items-center gap-1"><Calendar size={14} /> {formatDate(item.created_at)}</span>
                     </div>
                   </div>
                 </div>
@@ -125,7 +127,7 @@ Dicetak pada: ${new Date().toLocaleString('id-ID')}
                   </div>
                   <button 
                     onClick={() => handleDownload(item)}
-                    title="Download Laporan"
+                    title="Download Laporan Admin"
                     className="p-2 border border-gray-200 rounded-lg text-gray-600 hover:bg-white hover:border-primary hover:text-primary transition-all shadow-sm">
                     <Download size={18} />
                   </button>
@@ -138,11 +140,8 @@ Dicetak pada: ${new Date().toLocaleString('id-ID')}
             <FileBarChart size={64} className="text-gray-300 mb-4" />
             <h3 className="text-xl font-bold text-gray-900 mb-2">Belum Ada Riwayat Analisis</h3>
             <p className="text-gray-500 max-w-md mx-auto mb-6">
-              Semua simulasi dan analisis kelayakan yang Anda lakukan akan tersimpan di sini sebagai rekam jejak historis.
+              Belum ada satupun UMKM yang melakukan simulasi kelayakan kredit.
             </p>
-            <a href="/user/simulasi" className="bg-primary hover:bg-blue-800 text-white px-6 py-2.5 rounded-lg font-medium transition-colors shadow-sm">
-              Mulai Simulasi Kredit
-            </a>
           </div>
         )}
       </div>
@@ -150,4 +149,4 @@ Dicetak pada: ${new Date().toLocaleString('id-ID')}
   );
 };
 
-export default Riwayat;
+export default SkorKredit;
