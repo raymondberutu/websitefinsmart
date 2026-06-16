@@ -58,7 +58,7 @@ const Profil = () => {
       });
       setIs2FAEnabled(user.two_factor_enabled ?? false);
       if (user.profile_photo) {
-        setPhotoPreview(`http://localhost:8000/storage/${user.profile_photo}`);
+        setPhotoPreview(`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/storage/${user.profile_photo}`);
       }
     }
   }, [user]);
@@ -126,7 +126,7 @@ const Profil = () => {
       showMessage('success', 'Profil data diri berhasil diperbarui.');
       // Update photo preview based on new path
       if (data.user.profile_photo) {
-        setPhotoPreview(`http://localhost:8000/storage/${data.user.profile_photo}`);
+        setPhotoPreview(`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/storage/${data.user.profile_photo}`);
       }
     } catch (err) {
       console.error(err);
@@ -331,7 +331,7 @@ const Profil = () => {
               !isEditingPersonal ? (
                 <button onClick={() => setIsEditingPersonal(true)} className="bg-primary hover:bg-blue-800 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm">Edit Data Diri</button>
               ) : (
-                <button onClick={() => { setIsEditingPersonal(false); setPhotoPreview(user?.profile_photo ? `http://localhost:8000/storage/${user.profile_photo}` : null); }} className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm">Batal</button>
+                <button onClick={() => { setIsEditingPersonal(false); setPhotoPreview(user?.profile_photo ? `${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/storage/${user.profile_photo}` : null); }} className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm">Batal</button>
               )
             )}
 
