@@ -1,12 +1,39 @@
 import { useState } from 'react';
 import { Calculator, CheckCircle2, AlertCircle } from 'lucide-react';
+import api from '../../lib/axios';
 
 const SimulasiKredit = () => {
-  const [isCalculated, setIsCalculated] = useState(false);
+  const [formData, setFormData] = useState({
+    pendapatan: '',
+    total_transaksi: '',
+    lama_usaha: '',
+    karyawan: '',
+    status_tempat: 'Milik Sendiri'
+  });
+  
+  const [result, setResult] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSimulasi = (e) => {
+  const handleSimulasi = async (e) => {
     e.preventDefault();
-    setIsCalculated(true);
+    setLoading(true);
+    setError('');
+    
+    try {
+      const { data } = await api.post('/credit/simulate', formData);
+      setResult(data);
+      // Simpan flag di localStorage agar halaman lain tau user sudah pernah simulasi
+      localStorage.setItem('riwayat_simulasi', 'true');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Terjadi kesalahan saat menghitung simulasi.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   return (
@@ -28,6 +55,12 @@ const SimulasiKredit = () => {
             <h2 className="text-lg font-bold text-gray-900">Form Parameter Penilaian</h2>
           </div>
 
+          {error && (
+            <div className="mb-4 p-3 bg-red-50 text-red-600 rounded-lg border border-red-100 text-sm">
+              {error}
+            </div>
+          )}
+
           <form onSubmit={handleSimulasi} className="space-y-5">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
@@ -36,6 +69,9 @@ const SimulasiKredit = () => {
                   <span className="absolute left-4 top-2.5 text-gray-500 font-medium">Rp</span>
                   <input 
                     type="number" 
+                    name="pendapatan"
+                    value={formData.pendapatan}
+                    onChange={handleChange}
                     className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
                     placeholder="5000000"
                     required
@@ -46,6 +82,9 @@ const SimulasiKredit = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Total Transaksi QRIS/Bulan</label>
                 <input 
                   type="number" 
+                  name="total_transaksi"
+                  value={formData.total_transaksi}
+                  onChange={handleChange}
                   className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
                   placeholder="Contoh: 150"
                   required
@@ -55,6 +94,9 @@ const SimulasiKredit = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Lama Usaha Berjalan (Bulan)</label>
                 <input 
                   type="number" 
+                  name="lama_usaha"
+                  value={formData.lama_usaha}
+                  onChange={handleChange}
                   className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
                   placeholder="Contoh: 24"
                   required
@@ -64,6 +106,9 @@ const SimulasiKredit = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Jumlah Karyawan</label>
                 <input 
                   type="number" 
+                  name="karyawan"
+                  value={formData.karyawan}
+                  onChange={handleChange}
                   className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
                   placeholder="Contoh: 3"
                   required
@@ -71,7 +116,12 @@ const SimulasiKredit = () => {
               </div>
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Status Tempat Usaha</label>
-                <select className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all bg-white">
+                <select 
+                  name="status_tempat"
+                  value={formData.status_tempat}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all bg-white"
+                >
                   <option value="Milik Sendiri">Milik Sendiri</option>
                   <option value="Sewa">Sewa</option>
                   <option value="Menumpang">Menumpang / Milik Keluarga</option>
@@ -82,9 +132,10 @@ const SimulasiKredit = () => {
             <div className="pt-4 mt-6 border-t">
               <button 
                 type="submit" 
-                className="w-full bg-primary hover:bg-blue-800 text-white font-medium py-3 rounded-lg transition-colors shadow-md shadow-blue-200"
+                disabled={loading}
+                className="w-full bg-primary hover:bg-blue-800 text-white font-medium py-3 rounded-lg transition-colors shadow-md shadow-blue-200 disabled:opacity-50"
               >
-                Hitung Skor Sekarang
+                {loading ? 'Menghitung...' : 'Hitung Skor Sekarang'}
               </button>
             </div>
           </form>
@@ -92,40 +143,50 @@ const SimulasiKredit = () => {
 
         {/* Hasil Simulasi */}
         <div className="lg:col-span-5">
-          {isCalculated ? (
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-green-100 relative overflow-hidden">
+          {result ? (
+            <div className={`bg-white p-6 rounded-xl shadow-sm border relative overflow-hidden ${result.skor_akhir >= 600 ? 'border-green-100' : 'border-red-100'}`}>
               <div className="absolute top-0 right-0 p-4 opacity-10">
-                <CheckCircle2 size={120} className="text-green-500" />
+                <CheckCircle2 size={120} className={result.skor_akhir >= 600 ? 'text-green-500' : 'text-red-500'} />
               </div>
               
-              <h2 className="text-lg font-bold text-gray-900 mb-6">Hasil Analisis Credit Scoring</h2>
+              <h2 className="text-lg font-bold text-gray-900 mb-6 relative z-10">Hasil Analisis Credit Scoring</h2>
               
-              <div className="text-center mb-8">
+              <div className="text-center mb-8 relative z-10">
                 <p className="text-sm font-medium text-gray-500 mb-2">Skor Anda</p>
-                <div className="inline-flex items-center justify-center w-32 h-32 rounded-full border-8 border-green-500 bg-green-50 text-4xl font-black text-green-700">
-                  825
+                <div className={`inline-flex items-center justify-center w-32 h-32 rounded-full border-8 bg-white text-4xl font-black 
+                  ${result.skor_akhir >= 800 ? 'border-green-500 text-green-700' : 
+                    result.skor_akhir >= 600 ? 'border-blue-500 text-blue-700' : 
+                    result.skor_akhir >= 400 ? 'border-yellow-500 text-yellow-700' : 
+                    'border-red-500 text-red-700'}`}>
+                  {result.skor_akhir}
                 </div>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-4 relative z-10">
                 <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
                   <span className="text-sm text-gray-600 font-medium">Kategori Kelayakan</span>
-                  <span className="px-3 py-1 bg-green-100 text-green-700 text-sm font-bold rounded-full">Sangat Layak</span>
+                  <span className={`px-3 py-1 text-sm font-bold rounded-full 
+                    ${result.skor_akhir >= 800 ? 'bg-green-100 text-green-700' : 
+                      result.skor_akhir >= 600 ? 'bg-blue-100 text-blue-700' : 
+                      result.skor_akhir >= 400 ? 'bg-yellow-100 text-yellow-700' : 
+                      'bg-red-100 text-red-700'}`}>
+                    {result.status_kelayakan}
+                  </span>
                 </div>
                 <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
                   <span className="text-sm text-gray-600 font-medium">Estimasi Plafon Pinjaman</span>
-                  <span className="text-sm font-bold text-gray-900">Rp 10.000.000 - Rp 25.000.000</span>
+                  <span className="text-sm font-bold text-gray-900">{result.plafon_rekomendasi}</span>
                 </div>
                 <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
                   <span className="text-sm text-gray-600 font-medium">Rekomendasi Bunga</span>
-                  <span className="text-sm font-bold text-gray-900">0.9% - 1.2% per bulan</span>
+                  <span className="text-sm font-bold text-gray-900">{result.bunga_rekomendasi}</span>
                 </div>
               </div>
 
-              <div className="mt-8">
-                <button className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 rounded-lg transition-colors shadow-md shadow-green-200">
-                  Ajukan Pembiayaan
-                </button>
+              <div className="mt-8 relative z-10">
+                <a href="/user/rekomendasi" className="block w-full text-center bg-primary hover:bg-blue-800 text-white font-medium py-3 rounded-lg transition-colors shadow-md shadow-blue-200">
+                  Lihat Rekomendasi Pendanaan
+                </a>
               </div>
             </div>
           ) : (

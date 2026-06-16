@@ -27,7 +27,6 @@ const Pengaturan = () => {
     if (key === 'darkMode') {
       if (newSettings.darkMode) {
         document.documentElement.classList.add('dark');
-        alert('Tema gelap diaktifkan! (Tergantung konfigurasi Tailwind)');
       } else {
         document.documentElement.classList.remove('dark');
       }

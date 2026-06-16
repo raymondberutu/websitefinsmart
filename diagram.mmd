@@ -1,0 +1,71 @@
+classDiagram
+    class User {
+        -id : unsignedBigInteger
+        -name : string
+        -email : string
+        -email_verified_at : timestamp
+        -password : string
+        -role : enum
+        -remember_token : string
+        -created_at : timestamp
+        -updated_at : timestamp
+        +umkm()
+    }
+    class Umkm {
+        -id : unsignedBigInteger
+        -user_id : unsignedBigInteger
+        -nama_umkm : string
+        -lokasi : string
+        -jenis_usaha : string
+        -pendapatan : decimal
+        -created_at : timestamp
+        -updated_at : timestamp
+        +user()
+        +transaksiQris()
+        +creditScores()
+    }
+    class TransaksiQris {
+        -id : unsignedBigInteger
+        -umkm_id : unsignedBigInteger
+        -tanggal : date
+        -nominal : decimal
+        -metode_pembayaran : string
+        -status : string
+        -created_at : timestamp
+        -updated_at : timestamp
+        +umkm()
+    }
+    class CreditScore {
+        -id : unsignedBigInteger
+        -umkm_id : unsignedBigInteger
+        -score : int
+        -kategori : string
+        -status_kelayakan : string
+        -created_at : timestamp
+        -updated_at : timestamp
+        +umkm()
+    }
+    class Artikel {
+        -id : unsignedBigInteger
+        -penulis_id : unsignedBigInteger
+        -judul : string
+        -gambar : string
+        -isi : longText
+        -created_at : timestamp
+        -updated_at : timestamp
+        +penulis()
+    }
+    class Notifikasi {
+        -id : unsignedBigInteger
+        -user_id : unsignedBigInteger
+        -pesan : string
+        -status : enum
+        -created_at : timestamp
+        -updated_at : timestamp
+        +user()
+    }
+    User "1" --> "0..1" Umkm : hasOne
+    User "1" --> "*" Artikel : hasMany
+    User "1" --> "*" Notifikasi : hasMany
+    Umkm "1" --> "*" TransaksiQris : hasMany
+    Umkm "1" --> "*" CreditScore : hasMany

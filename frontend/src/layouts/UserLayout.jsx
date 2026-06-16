@@ -3,7 +3,7 @@ import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { 
   Home, Calculator, CreditCard, TrendingUp, Map, 
-  DollarSign, BookOpen, FileText, Bell, User, Settings, LogOut, Menu, X
+  DollarSign, BookOpen, FileText, Bell, User, Settings, LogOut, Menu, X, LifeBuoy, PieChart
 } from 'lucide-react';
 
 const UserSidebar = ({ isOpen, setIsOpen }) => {
@@ -12,14 +12,20 @@ const UserSidebar = ({ isOpen, setIsOpen }) => {
 
   const navItems = [
     { name: 'Dashboard', path: '/user/dashboard', icon: <Home size={20} /> },
-    { name: 'Simulasi Kredit', path: '/user/simulasi', icon: <Calculator size={20} /> },
+    { name: 'Top Up Saldo', path: '/user/wallet/topup', icon: <DollarSign size={20} /> },
+    { name: 'Transfer Dana', path: '/user/wallet/transfer', icon: <CreditCard size={20} /> },
+    { name: 'Bayar Tagihan', path: '/user/wallet/pembayaran', icon: <TrendingUp size={20} /> },
+    { name: 'Riwayat E-Wallet', path: '/user/wallet/riwayat', icon: <FileText size={20} /> },
     { name: 'Data Transaksi QRIS', path: '/user/transaksi', icon: <CreditCard size={20} /> },
+    { name: 'Laporan Keuangan', path: '/user/laporan', icon: <TrendingUp size={20} /> },
+    { name: 'Simulasi Kredit', path: '/user/simulasi', icon: <Calculator size={20} /> },
     { name: 'Analisis Kelayakan', path: '/user/analisis', icon: <TrendingUp size={20} /> },
     { name: 'Peta Sebaran UMKM', path: '/user/peta', icon: <Map size={20} /> },
     { name: 'Rekomendasi Pendanaan', path: '/user/rekomendasi', icon: <DollarSign size={20} /> },
     { name: 'Edukasi Keuangan', path: '/user/edukasi', icon: <BookOpen size={20} /> },
     { name: 'Riwayat Analisis', path: '/user/riwayat', icon: <FileText size={20} /> },
     { name: 'Buku Panduan', path: '/user/panduan', icon: <BookOpen size={20} /> },
+    { name: 'Bantuan', path: '/user/bantuan', icon: <LifeBuoy size={20} /> },
     { name: 'Notifikasi', path: '/user/notifikasi', icon: <Bell size={20} /> },
     { name: 'Profil Saya', path: '/user/profil', icon: <User size={20} /> },
     { name: 'Pengaturan', path: '/user/pengaturan', icon: <Settings size={20} /> },

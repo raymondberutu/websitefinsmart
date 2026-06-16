@@ -17,6 +17,16 @@
   }
 }
 
+html.dark {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+html.dark img,
+html.dark video,
+html.dark .lucide {
+  filter: invert(1) hue-rotate(180deg);
+}
+
 @layer utilities {
   .animation-delay-2000 {
     animation-delay: 2s;

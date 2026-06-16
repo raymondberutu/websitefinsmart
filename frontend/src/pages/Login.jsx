@@ -3,18 +3,31 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 const Login = () => {
-  const [email, setEmail] = useState('');
+  const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [requires2FA, setRequires2FA] = useState(false);
+  const [twoFactorCode, setTwoFactorCode] = useState('');
+  const [loginEmail, setLoginEmail] = useState('');
+  const [devCode, setDevCode] = useState('');
+
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, verify2FA } = useAuth();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
     try {
-      const user = await login(email, password);
-      if (user.role === 'admin') {
+      const result = await login(identifier, password);
+      
+      if (result.requires_2fa) {
+        setRequires2FA(true);
+        setLoginEmail(result.email);
+        setDevCode(result.dev_2fa_code); // For development convenience
+        return;
+      }
+
+      if (result.user?.role === 'admin') {
         navigate('/admin/dashboard');
       } else {
         navigate('/user/dashboard');
@@ -27,6 +40,22 @@ const Login = () => {
       } else {
         setError(err.response?.data?.message || err.message || 'Login gagal. Periksa kembali email dan password Anda.');
       }
+    }
+  };
+
+  const handleVerify2FA = async (e) => {
+    e.preventDefault();
+    setError('');
+    try {
+      const result = await verify2FA(loginEmail, twoFactorCode);
+      if (result.user?.role === 'admin') {
+        navigate('/admin/dashboard');
+      } else {
+        navigate('/user/dashboard');
+      }
+    } catch (err) {
+      console.error(err);
+      setError(err.response?.data?.message || 'Kode OTP tidak valid.');
     }
   };
 
@@ -44,35 +73,78 @@ const Login = () => {
           </div>
         )}
 
-        <form onSubmit={handleLogin} className="space-y-5">
-          <div>
-            <label className="block text-sm font-medium text-text-main mb-1">Email</label>
-            <input 
-              type="email" 
-              className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
-              placeholder="Masukkan email Anda"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-text-main mb-1">Password</label>
-            <input 
-              type="password" 
-              className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
-          
-          <button 
-            type="submit" 
-            className="w-full bg-primary hover:bg-blue-800 text-white font-medium py-3 rounded-lg transition-colors shadow-lg shadow-blue-200"
-          >
-            Masuk Sekarang
-          </button>
-        </form>
+        {requires2FA ? (
+          <form onSubmit={handleVerify2FA} className="space-y-5">
+            <div className="text-center mb-4">
+              <p className="text-sm text-gray-600">
+                Kami telah mengirimkan kode OTP 6-digit ke email Anda.<br/>
+                <span className="font-semibold text-gray-900">{loginEmail}</span>
+              </p>
+              {devCode && (
+                <div className="mt-2 text-xs bg-yellow-100 text-yellow-800 p-2 rounded border border-yellow-200">
+                  Dev Code: {devCode}
+                </div>
+              )}
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-text-main mb-1">Kode OTP</label>
+              <input 
+                type="text" 
+                className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all text-center tracking-[0.5em] text-lg font-bold"
+                placeholder="••••••"
+                maxLength={6}
+                value={twoFactorCode}
+                onChange={(e) => setTwoFactorCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+              />
+            </div>
+            <button 
+              type="submit" 
+              className="w-full bg-primary hover:bg-blue-800 text-white font-medium py-3 rounded-lg transition-colors shadow-lg shadow-blue-200"
+            >
+              Verifikasi & Masuk
+            </button>
+            <button 
+              type="button" 
+              onClick={() => { setRequires2FA(false); setTwoFactorCode(''); }}
+              className="w-full bg-transparent hover:bg-gray-100 text-gray-600 font-medium py-2 rounded-lg transition-colors text-sm mt-2"
+            >
+              Batal
+            </button>
+          </form>
+        ) : (
+          <form onSubmit={handleLogin} className="space-y-5">
+            <div>
+              <label className="block text-sm font-medium text-text-main mb-1">Email / Username</label>
+              <input 
+                type="text" 
+                className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                placeholder="Masukkan email atau username"
+                value={identifier}
+                onChange={(e) => setIdentifier(e.target.value)}
+              />
+            </div>
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-sm font-medium text-text-main">Password</label>
+                <a href="/forgot-password" className="text-sm text-primary hover:underline font-medium">Lupa Password?</a>
+              </div>
+              <input 
+                type="password" 
+                className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
+            
+            <button 
+              type="submit" 
+              className="w-full bg-primary hover:bg-blue-800 text-white font-medium py-3 rounded-lg transition-colors shadow-lg shadow-blue-200"
+            >
+              Masuk Sekarang
+            </button>
+          </form>
+        )}
 
         <div className="mt-6">
           <div className="relative">

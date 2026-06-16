@@ -7,23 +7,27 @@ const Panduan = () => {
   const guides = [
     {
       title: "Mulai Menggunakan FinSmart",
-      content: "Selamat datang di FinSmart! Langkah pertama yang harus Anda lakukan adalah melengkapi Profil UMKM Anda. Buka menu 'Profil Saya' dan isikan informasi dasar tentang bisnis Anda. Informasi ini sangat penting karena digunakan untuk mengkalkulasi Skor Kelayakan Kredit Anda nantinya."
+      content: "Selamat datang di FinSmart! Langkah pertama yang harus Anda lakukan adalah melengkapi Profil Anda. Buka menu 'Profil Saya' dan isikan informasi dasar Anda. Informasi ini sangat penting karena digunakan untuk mengelola data akun Anda."
     },
     {
-      title: "Cara Mencatat Transaksi QRIS",
-      content: "Untuk mencatat penjualan, masuk ke menu 'Data Transaksi QRIS'. Klik tombol 'Tambah Transaksi', lalu masukkan tanggal, nominal, metode pembayaran (misal: QRIS, Transfer, atau Tunai), serta statusnya. Seluruh catatan ini akan otomatis diakumulasi dan bisa Anda pantau perkembangannya di halaman Dashboard."
+      title: "Menggunakan E-Wallet (Dompet Digital)",
+      content: "FinSmart dilengkapi dengan dompet digital bawaan. Untuk mengisi saldo, gunakan menu 'Top Up Saldo' dan pilih metode (QRIS, VA Bank, dll). Anda dapat melakukan 'Transfer Dana' ke pengguna lain, atau membayar tagihan (Listrik, Pulsa) melalui menu 'Bayar Tagihan'. Semua transaksi tercatat otomatis di 'Riwayat E-Wallet'."
     },
     {
-      title: "Membaca Analisis Kelayakan",
-      content: "Menu 'Analisis Kelayakan' adalah fitur pintar yang mengukur kesehatan bisnis Anda. AI kami akan memberikan Skor Kredit dari skala 1-100. Jika skor Anda di atas 700, status Anda menjadi 'Sangat Layak' untuk mengajukan pinjaman bank. Pastikan untuk mencatat transaksi dengan jujur agar analisisnya akurat."
+      title: "Simulasi Kelayakan Kredit",
+      content: "Untuk mengetahui kelayakan usaha Anda, buka menu 'Simulasi Kredit'. Masukkan data pendapatan, transaksi, lama usaha, jumlah karyawan, dan status tempat. Sistem kami menggunakan algoritma khusus untuk menghasilkan Skor Kelayakan (0-1000) yang akan menentukan status dan estimasi plafon pinjaman Anda."
     },
     {
-      title: "Simulasi Kredit Bank",
-      content: "Ingin tahu berapa cicilan per bulan jika Anda meminjam modal? Buka menu 'Simulasi Kredit'. Masukkan jumlah pinjaman yang Anda inginkan, suku bunga per tahun, dan lama tenor (bulan). Sistem kami akan langsung menghitung estimasi cicilan per bulan untuk Anda."
+      title: "Membaca Analisis & Rekomendasi",
+      content: "Setelah melakukan simulasi, hasil analisis mendalam (Kesehatan Arus Kas, Kapasitas Bayar, Profil Risiko) dapat dilihat pada menu 'Analisis Kelayakan'. Selanjutnya, buka 'Rekomendasi Pendanaan' untuk melihat produk pinjaman (Bank/P2P) yang persentase kecocokannya paling sesuai dengan skor Anda."
     },
     {
-      title: "Mengunduh Laporan Keuangan",
-      content: "Anda bisa mengunduh rekap transaksi Anda kapan saja. Masuk ke halaman Dashboard, lalu klik tombol biru 'Download Laporan' di pojok kanan atas. Sistem akan membuatkan file berformat CSV yang bisa Anda buka di Microsoft Excel, siap diserahkan kepada pihak Bank jika diperlukan."
+      title: "Melihat Riwayat Analisis",
+      content: "Anda tidak perlu khawatir kehilangan data kalkulasi. Setiap kali Anda menekan 'Hitung Skor Sekarang' pada Simulasi Kredit, hasilnya akan tersimpan di menu 'Riwayat Analisis' sehingga Anda bisa memonitor perkembangan skor bisnis Anda dari waktu ke waktu."
+    },
+    {
+      title: "Mencatat Data Transaksi QRIS",
+      content: "Masuk ke menu 'Data Transaksi QRIS' untuk mencatat secara manual transaksi bisnis Anda. Anda juga bisa mengunduh rekap transaksi Anda dalam format Excel (.xlsx) atau PDF melalui tombol Export di halaman Laporan Keuangan untuk diserahkan kepada pihak Bank."
     }
   ];
 

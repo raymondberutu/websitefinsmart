@@ -1,14 +1,20 @@
 import { useState, useEffect } from 'react';
-import { Search, Filter, Plus, Edit2, Trash2 } from 'lucide-react';
+import { Search, Filter, Plus, Edit2, Trash2, Lock } from 'lucide-react';
 import api from '../../lib/axios';
 import Modal from '../../components/Modal';
+import { useAuth } from '../../contexts/AuthContext';
 
 const Transaksi = () => {
+  const { user } = useAuth();
   const [transactions, setTransactions] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [deleteId, setDeleteId] = useState(null);
+  const [pin, setPin] = useState('');
   const [formData, setFormData] = useState({
     tanggal: '',
+    jenis: 'pemasukan',
     nominal: '',
     metode_pembayaran: 'QRIS',
     status: 'Berhasil'
@@ -32,6 +38,7 @@ const Transaksi = () => {
       setEditingId(trx.id);
       setFormData({
         tanggal: trx.tanggal,
+        jenis: trx.jenis || 'pemasukan',
         nominal: trx.nominal,
         metode_pembayaran: trx.metode_pembayaran,
         status: trx.status
@@ -40,6 +47,7 @@ const Transaksi = () => {
       setEditingId(null);
       setFormData({
         tanggal: new Date().toISOString().split('T')[0],
+        jenis: 'pemasukan',
         nominal: '',
         metode_pembayaran: 'QRIS',
         status: 'Berhasil'
@@ -51,26 +59,35 @@ const Transaksi = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      const payload = { ...formData, pin };
       if (editingId) {
-        await api.put(`/transaksi/${editingId}`, formData);
+        await api.put(`/transaksi/${editingId}`, payload);
       } else {
-        await api.post('/transaksi', formData);
+        await api.post('/transaksi', payload);
       }
       setIsModalOpen(false);
+      setPin('');
       fetchTransactions();
     } catch (error) {
       alert(error.response?.data?.message || 'Gagal menyimpan transaksi');
     }
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm('Yakin ingin menghapus transaksi ini?')) {
-      try {
-        await api.delete(`/transaksi/${id}`);
-        fetchTransactions();
-      } catch (error) {
-        alert('Gagal menghapus transaksi');
-      }
+  const confirmDelete = (id) => {
+    setDeleteId(id);
+    setPin('');
+    setIsDeleteModalOpen(true);
+  };
+
+  const executeDelete = async (e) => {
+    e.preventDefault();
+    try {
+      await api.delete(`/transaksi/${deleteId}`, { data: { pin } });
+      setIsDeleteModalOpen(false);
+      setPin('');
+      fetchTransactions();
+    } catch (error) {
+      alert(error.response?.data?.message || 'Gagal menghapus transaksi');
     }
   };
 
@@ -112,6 +129,7 @@ const Transaksi = () => {
               <tr className="bg-gray-50 border-b border-gray-100 text-gray-500 text-sm">
                 <th className="px-6 py-4 font-medium">ID</th>
                 <th className="px-6 py-4 font-medium">Tanggal</th>
+                <th className="px-6 py-4 font-medium">Jenis</th>
                 <th className="px-6 py-4 font-medium">Nominal</th>
                 <th className="px-6 py-4 font-medium">Metode Pembayaran</th>
                 <th className="px-6 py-4 font-medium">Status</th>
@@ -123,6 +141,13 @@ const Transaksi = () => {
                 <tr key={trx.id} className="hover:bg-gray-50/50 transition-colors">
                   <td className="px-6 py-4 text-sm text-gray-900 font-medium">#{trx.id}</td>
                   <td className="px-6 py-4 text-sm text-gray-600">{trx.tanggal}</td>
+                  <td className="px-6 py-4 text-sm font-medium">
+                    {trx.jenis === 'pengeluaran' ? (
+                      <span className="text-red-600 bg-red-50 px-2 py-1 rounded-md">Pengeluaran</span>
+                    ) : (
+                      <span className="text-green-600 bg-green-50 px-2 py-1 rounded-md">Pemasukan</span>
+                    )}
+                  </td>
                   <td className="px-6 py-4 text-sm text-gray-900 font-bold">
                     Rp {Number(trx.nominal).toLocaleString('id-ID')}
                   </td>
@@ -139,7 +164,7 @@ const Transaksi = () => {
                     <button onClick={() => handleOpenModal(trx)} className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-md transition-colors" title="Edit">
                       <Edit2 size={16} />
                     </button>
-                    <button onClick={() => handleDelete(trx.id)} className="p-1.5 text-red-600 hover:bg-red-50 rounded-md transition-colors" title="Hapus">
+                    <button onClick={() => confirmDelete(trx.id)} className="p-1.5 text-red-600 hover:bg-red-50 rounded-md transition-colors" title="Hapus">
                       <Trash2 size={16} />
                     </button>
                   </td>
@@ -172,6 +197,17 @@ const Transaksi = () => {
               onChange={e => setFormData({...formData, tanggal: e.target.value})}
               className="w-full px-3 py-2 border rounded-lg focus:ring-primary focus:border-primary"
             />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Jenis Transaksi</label>
+            <select 
+              value={formData.jenis}
+              onChange={e => setFormData({...formData, jenis: e.target.value})}
+              className="w-full px-3 py-2 border rounded-lg focus:ring-primary focus:border-primary"
+            >
+              <option value="pemasukan">Pemasukan</option>
+              <option value="pengeluaran">Pengeluaran</option>
+            </select>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Nominal (Rp)</label>
@@ -207,9 +243,56 @@ const Transaksi = () => {
               <option value="Gagal">Gagal</option>
             </select>
           </div>
+          {user?.role !== 'admin' && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2"><Lock size={14}/> PIN Transaksi</label>
+              <input 
+                type="password" 
+                required
+                maxLength={6}
+                value={pin}
+                onChange={e => setPin(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                className="w-full px-3 py-2 border rounded-lg focus:ring-primary focus:border-primary tracking-[0.5em] text-center text-lg"
+                placeholder="••••••"
+              />
+              <p className="text-xs text-gray-500 mt-1 text-center">Masukkan 6-digit PIN transaksi Anda untuk mengonfirmasi.</p>
+            </div>
+          )}
           <div className="pt-4">
             <button type="submit" className="w-full bg-primary hover:bg-blue-800 text-white font-medium py-2 rounded-lg transition-colors">
               Simpan Transaksi
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      <Modal 
+        isOpen={isDeleteModalOpen} 
+        onClose={() => setIsDeleteModalOpen(false)}
+        title="Hapus Transaksi"
+      >
+        <form onSubmit={executeDelete} className="space-y-4">
+          <p className="text-sm text-gray-600">Apakah Anda yakin ingin menghapus transaksi ini? Tindakan ini tidak dapat dibatalkan.</p>
+          {user?.role !== 'admin' && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2"><Lock size={14}/> PIN Transaksi</label>
+              <input 
+                type="password" 
+                required
+                maxLength={6}
+                value={pin}
+                onChange={e => setPin(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                className="w-full px-3 py-2 border rounded-lg focus:ring-primary focus:border-primary tracking-[0.5em] text-center text-lg"
+                placeholder="••••••"
+              />
+            </div>
+          )}
+          <div className="pt-4 flex gap-3">
+            <button type="button" onClick={() => setIsDeleteModalOpen(false)} className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-2 rounded-lg transition-colors">
+              Batal
+            </button>
+            <button type="submit" className="flex-1 bg-red-600 hover:bg-red-700 text-white font-medium py-2 rounded-lg transition-colors">
+              Hapus
             </button>
           </div>
         </form>

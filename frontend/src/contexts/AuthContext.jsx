@@ -25,18 +25,43 @@ export const AuthProvider = ({ children }) => {
     loadUser();
   }, []);
 
-  const login = async (email, password) => {
-    const { data } = await api.post('/login', { email, password });
+  const login = async (identifier, password) => {
+    const { data } = await api.post('/login', { identifier, password });
+    if (data.requires_2fa) {
+      return data; // Returns requires_2fa, email, dev_2fa_code
+    }
+    localStorage.setItem('token', data.access_token);
+    setUser(data.user);
+    return data;
+  };
+
+  const verify2FA = async (email, code) => {
+    const { data } = await api.post('/login/verify-2fa', { email, code });
+    localStorage.setItem('token', data.access_token);
+    setUser(data.user);
+    return data;
+  };
+
+  const register = async (userData) => {
+    const { data } = await api.post('/register', userData);
+    return data; // Returns message and dev_verification_code, no token yet
+  };
+
+  const verifyAccount = async (email, code) => {
+    const { data } = await api.post('/verify-email', { email, code });
     localStorage.setItem('token', data.access_token);
     setUser(data.user);
     return data.user;
   };
 
-  const register = async (userData) => {
-    const { data } = await api.post('/register', userData);
-    localStorage.setItem('token', data.access_token);
-    setUser(data.user);
-    return data.user;
+  const forgotPassword = async (email) => {
+    const { data } = await api.post('/forgot-password', { email });
+    return data;
+  };
+
+  const resetPassword = async (token, email, password, password_confirmation) => {
+    const { data } = await api.post('/reset-password', { token, email, password, password_confirmation });
+    return data;
   };
 
   const logout = async () => {
@@ -50,7 +75,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, loading }}>
+    <AuthContext.Provider value={{ user, setUser, login, verify2FA, register, verifyAccount, forgotPassword, resetPassword, logout, loading }}>
       {!loading && children}
     </AuthContext.Provider>
   );

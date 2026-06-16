@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\TransaksiQris;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class TransaksiQrisController extends Controller
 {
@@ -27,12 +28,21 @@ class TransaksiQrisController extends Controller
     public function store(Request $request)
     {
         $user = $request->user();
-        if (!$user->umkm) {
-            return response()->json(['message' => 'Silakan lengkapi profil UMKM Anda terlebih dahulu.'], 403);
+        if ($user->role !== 'admin') {
+            if (!$user->umkm) {
+                return response()->json(['message' => 'Silakan lengkapi profil UMKM Anda terlebih dahulu.'], 403);
+            }
+            if (!$user->pin) {
+                return response()->json(['message' => 'Silakan buat PIN Transaksi di menu Pengaturan/Keamanan terlebih dahulu.'], 403);
+            }
+            if (!$request->pin || !Hash::check($request->pin, $user->pin)) {
+                return response()->json(['message' => 'PIN Transaksi tidak valid.'], 403);
+            }
         }
 
         $request->validate([
             'tanggal' => 'required|date',
+            'jenis' => 'required|in:pemasukan,pengeluaran',
             'nominal' => 'required|numeric|min:0',
             'metode_pembayaran' => 'required|string|max:50',
             'status' => 'required|string|max:20',
@@ -41,6 +51,7 @@ class TransaksiQrisController extends Controller
         $transaksi = TransaksiQris::create([
             'umkm_id' => $user->umkm->id,
             'tanggal' => $request->tanggal,
+            'jenis' => $request->jenis,
             'nominal' => $request->nominal,
             'metode_pembayaran' => $request->metode_pembayaran,
             'status' => $request->status,
@@ -53,6 +64,7 @@ class TransaksiQrisController extends Controller
     {
         $request->validate([
             'tanggal' => 'required|date',
+            'jenis' => 'required|in:pemasukan,pengeluaran',
             'nominal' => 'required|numeric|min:0',
             'metode_pembayaran' => 'required|string|max:50',
             'status' => 'required|string|max:20',
@@ -65,9 +77,16 @@ class TransaksiQrisController extends Controller
             if (!$request->user()->umkm || $transaksi->umkm_id !== $request->user()->umkm->id) {
                 return response()->json(['message' => 'Unauthorized'], 403);
             }
+            $user = $request->user();
+            if (!$user->pin) {
+                return response()->json(['message' => 'Silakan buat PIN Transaksi di menu Pengaturan/Keamanan terlebih dahulu.'], 403);
+            }
+            if (!$request->pin || !Hash::check($request->pin, $user->pin)) {
+                return response()->json(['message' => 'PIN Transaksi tidak valid.'], 403);
+            }
         }
 
-        $transaksi->update($request->only(['tanggal', 'nominal', 'metode_pembayaran', 'status']));
+        $transaksi->update($request->only(['tanggal', 'jenis', 'nominal', 'metode_pembayaran', 'status']));
 
         return response()->json(['message' => 'Transaksi berhasil diperbarui', 'data' => $transaksi]);
     }
@@ -80,6 +99,13 @@ class TransaksiQrisController extends Controller
         if ($request->user()->role !== 'admin') {
             if (!$request->user()->umkm || $transaksi->umkm_id !== $request->user()->umkm->id) {
                 return response()->json(['message' => 'Unauthorized'], 403);
+            }
+            $user = $request->user();
+            if (!$user->pin) {
+                return response()->json(['message' => 'Silakan buat PIN Transaksi di menu Pengaturan/Keamanan terlebih dahulu.'], 403);
+            }
+            if (!$request->pin || !Hash::check($request->pin, $user->pin)) {
+                return response()->json(['message' => 'PIN Transaksi tidak valid.'], 403);
             }
         }
 
@@ -113,14 +139,14 @@ class TransaksiQrisController extends Controller
             $file = fopen('php://output', 'w');
             
             if ($user->role === 'admin') {
-                fputcsv($file, ['ID', 'UMKM', 'Tanggal', 'Nominal', 'Metode', 'Status']);
+                fputcsv($file, ['ID', 'UMKM', 'Tanggal', 'Jenis', 'Nominal', 'Metode', 'Status']);
                 foreach ($transactions as $row) {
-                    fputcsv($file, [$row->id, $row->umkm->nama_umkm ?? 'Unknown', $row->tanggal, $row->nominal, $row->metode_pembayaran, $row->status]);
+                    fputcsv($file, [$row->id, $row->umkm->nama_umkm ?? 'Unknown', $row->tanggal, $row->jenis, $row->nominal, $row->metode_pembayaran, $row->status]);
                 }
             } else {
-                fputcsv($file, ['ID', 'Tanggal', 'Nominal', 'Metode', 'Status']);
+                fputcsv($file, ['ID', 'Tanggal', 'Jenis', 'Nominal', 'Metode', 'Status']);
                 foreach ($transactions as $row) {
-                    fputcsv($file, [$row->id, $row->tanggal, $row->nominal, $row->metode_pembayaran, $row->status]);
+                    fputcsv($file, [$row->id, $row->tanggal, $row->jenis, $row->nominal, $row->metode_pembayaran, $row->status]);
                 }
             }
             fclose($file);

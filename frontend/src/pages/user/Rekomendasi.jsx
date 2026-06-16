@@ -1,11 +1,53 @@
-import { Building2, Percent, CheckCircle, ChevronRight } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Building2, Percent, CheckCircle, ChevronRight, Loader, AlertCircle } from 'lucide-react';
+import api from '../../lib/axios';
 
 const Rekomendasi = () => {
-  const recommendations = [
-    { id: 1, bank: 'Bank Rakyat Indonesia (BRI)', product: 'KUR Mikro BRI', rate: '0.2%', limit: 'S.d Rp 50 Juta', matched: 98 },
-    { id: 2, bank: 'Bank Mandiri', product: 'Kredit Usaha Mikro', rate: '0.5%', limit: 'S.d Rp 25 Juta', matched: 85 },
-    { id: 3, bank: 'Amartha FinTech', product: 'Modal Kerja Syariah', rate: '1.1%', limit: 'S.d Rp 15 Juta', matched: 72 },
-  ];
+  const [recommendations, setRecommendations] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchRecommendations = async () => {
+      try {
+        const { data } = await api.get('/credit/recommendations');
+        setRecommendations(data);
+      } catch (err) {
+        console.error('Failed to fetch recommendations', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchRecommendations();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <Loader className="animate-spin text-primary" size={32} />
+      </div>
+    );
+  }
+
+  if (recommendations.length === 0) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Rekomendasi Pendanaan</h1>
+          <p className="text-gray-500 text-sm mt-1">Produk pinjaman dan permodalan yang paling sesuai dengan skor kredit Anda.</p>
+        </div>
+        <div className="bg-white p-12 rounded-xl shadow-sm border border-gray-100 flex flex-col items-center justify-center text-center">
+          <AlertCircle size={64} className="text-gray-300 mb-4" />
+          <h3 className="text-xl font-bold text-gray-900 mb-2">Belum ada Rekomendasi</h3>
+          <p className="text-gray-500 max-w-md mx-auto mb-6">
+            Anda belum melakukan simulasi kredit. Silakan menuju menu Simulasi Kredit untuk mengisi data usaha dan mendapatkan produk pendanaan yang cocok.
+          </p>
+          <a href="/user/simulasi" className="bg-primary hover:bg-blue-800 text-white px-6 py-2.5 rounded-lg font-medium transition-colors shadow-sm">
+            Mulai Simulasi Kredit
+          </a>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

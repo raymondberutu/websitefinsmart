@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 
-#[Fillable(['umkm_id', 'tanggal', 'nominal', 'metode_pembayaran', 'status'])]
+#[Fillable(['umkm_id', 'tanggal', 'jenis', 'nominal', 'metode_pembayaran', 'status'])]
 class TransaksiQris extends Model
 {
     public function umkm()
