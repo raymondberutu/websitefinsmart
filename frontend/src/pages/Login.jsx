@@ -171,7 +171,8 @@ const Login = () => {
                   if (popup && popup.closed) {
                     clearInterval(timer);
                     try {
-                      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/login/google-mock`, {
+                      const apiUrl = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '') : 'http://localhost:8000';
+                      const response = await fetch(`${apiUrl}/api/login/google-mock`, {
                         method: 'POST',
                         headers: { 'Accept': 'application/json' }
                       });
